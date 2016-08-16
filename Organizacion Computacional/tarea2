@@ -1,0 +1,181 @@
+PRINT MACRO MSG
+    
+    LOCAL LTR
+    MOV AH, 0Eh
+    MOV SI, 0
+LTR:
+    MOV AL, MSG[SI]
+    INT 10h
+    INC SI
+    CMP AL, 0
+    JNZ LTR
+    INC DH
+    MOV AH, 02H
+    INT 10h
+        
+PRINT ENDM
+
+ORG 100H
+JMP START
+
+INTR DB 'Selecciona el formato para la hora que deseas:',0
+OPC1 DB 'A) ddmmaa',0  
+OPC2 DB 'B) mmddaa',0
+OPC3 DB 'C) ddmmaaaa',0
+OPC4 DB 'D) aammdd',0
+
+
+START:
+MOV AH, 00h
+MOV AL, 03h
+INT 10h
+
+PRINT OPC1
+PRINT OPC2
+PRINT OPC3
+PRINT OPC4
+
+MOV AH, 00h
+INT 16h
+MOV AH, 0Eh
+INT 10h
+INC DH
+MOV AH, 02H
+INT 10h
+
+CHECK PROC
+    
+    CMP AL, 'A'
+    JNZ O2
+    CALL DAY   ;aqui es en donde mandaríamos a los procs para cada situacion
+    CALL MTH
+    CALL YER
+    
+O2: CMP AL, 'B'
+    JNZ O3
+    CALL MTH
+    CALL DAY
+    CALL YER
+      
+O3: CMP AL, 'C'
+    JNZ O4
+    CALL DAY
+    CALL MTH
+    CALL YERLONG    
+       
+O4: CMP AL, 'D'
+    JNZ CNT
+    CALL YER
+    CALL MTH
+    CALL DAY
+
+CNT:
+    
+    RET
+CHECK ENDP 
+
+DAY PROC
+    
+    MOV AH, 2Ah ;CAPTURAR HORA DEL SISTEMA
+    INT 21h
+    
+    MOV AH, 0
+    MOV AL, DL
+    MOV BL, 10
+    DIV BL    
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    
+    RET
+DAY ENDP 
+
+MTH PROC
+
+    MOV AH, 2Ah ;CAPTURAR HORA DEL SISTEMA
+    INT 21h
+    
+    MOV AH, 0
+    MOV AL, DH
+    MOV BL, 10
+    DIV BL    
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    RET
+MTH ENDP
+
+YER PROC
+    
+    MOV AH, 2Ah ;CAPTURAR HORA DEL SISTEMA
+    INT 21h
+    
+    MOV AX, CX
+    MOV CX, 1000
+    MOV DX, 0
+    DIV CX   
+    
+    MOV AH, 0
+    MOV AL, DL
+    MOV BL, 10
+    DIV BL 
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    RET
+YER ENDP
+
+YERLONG PROC
+    
+    MOV AH, 2Ah ;CAPTURAR HORA DEL SISTEMA
+    INT 21h
+    
+    MOV AX, CX
+    MOV CX, 1000
+    MOV DX, 0
+    DIV CX   
+
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    
+    MOV AH, 0
+    MOV AL, DL
+    MOV BL, 10
+    DIV BL 
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    RET
+YERLONG ENDP
+                 
+HLT                                

@@ -1,0 +1,7 @@
+#pragma once
+
+
+class Cono
+{
+    
+};

@@ -1,0 +1,34 @@
+org  100h	; set location counter to 100h    
+;     inmediato
+;mov ax, 1978
+;mov bx, 100h
+;mov al, 46o    
+
+;     directo
+;mov bx, 100h   ; a bx le asigna el valor 100h
+;mov bx, [100h] ; a bx le asigna el valor en la locacion 100h
+;mov cl, [105h]  
+
+;     registro       
+;mov bx, 1575 ;a bx le asigna el valor 1575
+;mov dh, 165
+;mov cx, bx
+;mov al, dh
+
+;     registro indexado
+;mov di, 110h
+;mov [di], 5657;
+;mov bx, 100h
+;mov ah, [bx]
+ 
+;    indexado de base
+;mov bp, 120h
+;mov [bp][3],198
+;mov [bp-3], 198
+ 
+; MOVsb
+mov si, 100h
+mov di, 110h
+mov cx, 10
+cld; pone la bandera en DF en 0
+rep movsb; rep repite el proceso usando cx como un contador

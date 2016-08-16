@@ -1,0 +1,215 @@
+PRINT MACRO MSG
+    
+    LOCAL LTR
+    MOV AH, 0Eh
+    MOV SI, 0
+LTR:
+    MOV AL, MSG[SI]
+    INT 10h
+    INC SI
+    CMP AL, 0
+    JNZ LTR
+    INC DH
+    MOV AH, 02H
+    INT 10h
+        
+PRINT ENDM
+
+ORG 100H
+JMP START
+
+INTR DB 'Selecciona el formato para la hora que deseas:',0
+OPC1 DB 'A) hh:mm:ss - 24h',0  
+OPC2 DB 'B) mm:hh - 24h',0
+OPC3 DB 'C) ss:mm:hh - 24h',0  
+OPC4 DB 'D) hh:mm:ss - 12h',0  
+OPC5 DB 'E) mm:hh - 12h',0
+OPC6 DB 'F) ss:mm:hh - 12h',0
+
+
+START:
+MOV AH, 00h
+MOV AL, 03h
+INT 10h
+
+PRINT INTR
+PRINT OPC1
+PRINT OPC2
+PRINT OPC3 
+PRINT OPC4
+PRINT OPC5
+PRINT OPC6
+
+MOV AH, 00h
+INT 16h
+MOV AH, 0Eh
+INT 10h
+INC DH
+MOV AH, 02H
+INT 10h
+
+CHECK PROC
+    
+    CMP AL, 'A'
+    JNZ O2
+    CALL HOUR
+    CALL COLLON
+    CALL MIN
+    CALL COLLON
+    CALL SEC
+    
+O2: CMP AL, 'B'
+    JNZ O3
+    CALL MIN
+    CALL COLLON
+    CALL HOUR
+      
+O3: CMP AL, 'C'
+    JNZ O4
+    CALL SEC 
+    CALL COLLON
+    CALL MIN   
+    CALL COLLON
+    CALL HOUR 
+
+O4: CMP AL, 'D'
+    JNZ O5
+    CALL HOUR12
+    CALL COLLON
+    CALL MIN
+    CALL COLLON
+    CALL SEC
+    
+O5: CMP AL, 'E'
+    JNZ O6
+    CALL MIN
+    CALL COLLON
+    CALL HOUR12
+      
+O6: CMP AL, 'F'
+    JNZ CNT
+    CALL SEC 
+    CALL COLLON
+    CALL MIN   
+    CALL COLLON
+    CALL HOUR12        
+       
+CNT:
+    RET
+CHECK ENDP 
+
+COLLON PROC
+    MOV AH, 0Eh
+    MOV AL, ':'
+    INT 10h    
+    RET
+COLLON ENDP
+
+MIN PROC
+    
+    MOV AH, 2Ch ;CAPTURAR HORA DEL SISTEMA
+    INT 21h
+    
+    MOV AH, 0
+    MOV AL, CL
+    MOV BL, 10
+    DIV BL    
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    
+    RET
+MIN ENDP 
+
+SEC PROC
+
+    MOV AH, 2Ch ;CAPTURAR HORA DEL SISTEMA
+    INT 21h
+    
+    MOV AH, 0
+    MOV AL, DH
+    MOV BL, 10
+    DIV BL    
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    RET
+SEC ENDP
+
+HOUR PROC
+    
+    MOV AH, 2Ch ;CAPTURAR HORA DEL SISTEMA
+    INT 21h 
+    
+    MOV AH, 0
+    MOV AL, CH
+    MOV BL, 10
+    DIV BL 
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h
+    RET
+HOUR ENDP
+
+HOUR12 PROC
+    
+    MOV AH, 2Ch ;CAPTURAR HORA DEL SISTEMA
+    INT 21h 
+    
+    CMP CH, 12
+    JB NEXT
+    SUB CH, 12d
+    MOV SI, 1d    
+    
+NEXT:
+    MOV AH, 0
+    MOV AL, CH
+    MOV BL, 10
+    DIV BL 
+    
+    ADD AH, 30h
+    ADD AL, 30h
+    MOV DH, AH
+    
+    MOV AH, 0Eh
+    INT 10h
+    MOV AL, DH
+    INT 10h 
+    
+    CMP SI, 1d
+    JNZ AM
+    MOV AL, 'P'
+    INT 10h
+    MOV AL, 'M'
+    INT 10h
+    JMP FINISH
+
+AM:
+    MOV AL, 'A'
+    INT 10h
+    MOV AL, 'M'
+    INT 10h   
+       
+FINISH:
+    RET
+HOUR12 ENDP
+                 
+HLT

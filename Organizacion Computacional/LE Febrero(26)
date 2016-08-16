@@ -1,0 +1,22 @@
+org 100h
+mov ah, 57h; asigna el valor 57h en ah
+sahf; guarda el valor en las banderas en un orden especifico (SF ZF XX AF XX PF XX CF)
+mov cx, 03
+rep lahf
+
+
+
+*****************   Multiplicacion   ******************************
+
+org 100h
+mov ax, 4bc4h
+mov bx, 3ah
+mov cx, 1632h
+mul cx;mul ya sabe que siempre se multiplica por ax
+mov di, ax; el resultado se almacena en ax y dx
+mov si, dx
+mov ax, bx
+mul cx
+add si, ax; se suman dos valores, y se guarda en el primer registro que se esceibe
+adc dx, 00;siempre se hace esto por el acarreo
+

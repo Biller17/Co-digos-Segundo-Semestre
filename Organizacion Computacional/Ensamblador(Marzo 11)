@@ -1,0 +1,112 @@
+
+org  100h   ; set location counter to 100h
+
+
+
+MSG DB 'omar', 0        ;Creamos vector omar y 0 indica el termino
+  
+INICIO:   
+    mov CX, 5           ;Para copiar el vector 5 veces
+    mov DI, 200h;       ; Para guardar el vector
+    mov SI, 0;          ; SI obtiene el indice del vector
+CICLO:    
+    mov AL, MSG[SI]     ; Como arreglo AL = arre[0] 
+    mov [DI], AL        ; Guaramos en la memoria el valor       
+    
+    ; Incrementamos
+    inc DI
+    inc SI          
+    
+    ; Parte logica
+    CMP Al, 0    ; Revisamos si AL es 0 (esta al final del vector)
+    JNZ CICLO    ; Se sale de ciclo al llegar a 0
+    mov SI, 0    ; Volvemos SI 0 de nuevo para volver a copiar el vector
+    loop CICLO   ; Repetimos el ciclo
+ret
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+org  100h   ; set location counter to 100h
+
+
+; De la manera facil, multiplicamos 18 y 25 y la guardamos en AX
+mov AL, 18
+mov BL, 25
+MUL Bl  
+mov DI, AX      ;Resultado para comparar               
+
+
+; Variables generales
+mov DX, 00      ; Guarda la suma total
+mov AX, 18      ; Numero de veces que vamos a multiplicar    
+
+CICLO:
+     mov CL, BL   ; Guardas 25 (el numbero de veces que quieres multiplicar). Esto es como guardarlo en CX,pero sin perder los valores
+     MOV CH, 00   
+    
+SUMA:
+     ADD DX, AX     ; Suma DX y AX y guarda el resultado en DX.   
+loop SUMA           ; Se repite CL veces el ciclo
+                      
+RET
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+org 100h
+JMP INICIO
+
+;VECTORES DE DATOS    
+
+NOMBRE DB 'A ARTHUR SE LA METEN ENTERITA.', 10,13
+       DB 'REPETIDAMENTE, TODO EL TIEMPO. ARTHUR LO DISFRUTA',0
+INICIO: MOV AH, 00h   ;Video   
+        MOV AL, 03h   ; Configuracion video
+        INT 10h       ; Inicia video
+        mov AH, 0EH   ; Modo Texto ASCII sin atribtos
+        mov BX, 0     ; Para correr por el vector. Run Vector, Run!!
+ 
+CICLO:
+        mov AL, NOMBRE[BX] ; Copiamos el vector  
+        int 10h;           ; Inicia texto
+        INC BX             ; Siguiente letra                  
+        CMP NOMBRE[BX],0   ; Revisamos si ya es la ultima letra
+        JNZ CICLO  
+    
+
+------------------------------------------------------------------------------------------------------------------------------
+
+org 100h
+JMP INICIO
+
+;VECTORES DE DATOS    
+NOMBRE DB 'Sacaremos un 100', 10,13
+       DB 'LALALLALALALALAALALALALALALALLALAAAL',0
+
+
+INICIO: 
+        MOV AH, 00
+        MOV AL, 00
+        INT 10h         ;Pantalla  
+            
+        mov DX, 3h      ;Fila      
+        mov SI, 0       ;Posicion del vector  
+        mov BL, 01h     ;Color de inicio
+        
+CICLO:
+        MOV AH, 02h     ;Cursos         
+        mov BH, 00      ;Paginado 
+        INT 10h         ;Posicion que se indica
+        mov AH, 09;     
+        mov AL, NOMBRE[SI]
+        mov CX, 2           
+        int 10h         ;Imprime con color
+        inc SI   
+        inc Bl          ; Cambiamos el color
+        inc DL
+        CMP AL,0    
+        JNZ CICLO    
+        
+RET
+       
